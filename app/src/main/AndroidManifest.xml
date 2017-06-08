@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="com.example.moonh.inbody_scale"
+    android:versionCode="1"
+    android:versionName="1.0">
+    <uses-sdk android:minSdkVersion="18"
+        android:targetSdkVersion="24"/>
+
+
+    //여기서는 설계하려면 생략해도 된다고 했지만 일단 넣음
+    <uses-feature android:name="android.hardware.BLE" android:required="true"/>
+
+    <uses-permission android:name="android.permission.BLUETOOTH"/>
+    <uses-permission android:name="android.permission.BLUETOOTH_ADMIN"/>
+
+
+    <application
+        android:label="Inbody scale"
+
+        android:icon="@mipmap/ic_launcher"
+
+        android:theme="@android:style/Theme.Holo.Light">
+        <activity android:name=".MainActivity"
+            android:label="@string/app_name">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+        <activity android:name = "com.example.moonh.inbody_scale.DeviceScanActivity"/>
+        <activity android:name = "com.example.moonh.inbody_scale.DeviceControlActivity"/>
+        <service android:name = "com.example.moonh.inbody_scale.BluetoothLeService"/>
+
+    </application>
+</manifest>
