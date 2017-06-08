@@ -6,6 +6,9 @@ import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothGattCharacteristic;
 import android.bluetooth.BluetoothManager;
+import android.bluetooth.le.BluetoothLeScanner;
+import android.bluetooth.le.ScanCallback;
+import android.bluetooth.le.ScanResult;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -22,6 +25,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import java.util.ArrayList;
+import java.util.List;
 /**
  * Created by moonh on 2017-05-12.
  */
@@ -29,6 +33,7 @@ import java.util.ArrayList;
 public class DeviceScanActivity extends ListActivity{
     private LeDeviceListAdapter mLeDeviceListAdapter;
     private BluetoothAdapter mBluetoothAdapter;
+    private BluetoothLeScanner mBLEScanner;
     private boolean mScanning;
     private Handler mHandler;
 
@@ -57,6 +62,12 @@ public class DeviceScanActivity extends ListActivity{
         // displays a dialog requesting user permission to enable Bluetooth.
         if (mBluetoothAdapter == null) {
             Toast.makeText(this, R.string.error_bluetooth_not_supported, Toast.LENGTH_SHORT).show();
+            finish();
+            return;
+        }
+        mBLEScanner = mBluetoothAdapter.getBluetoothLeScanner();
+        if(mBLEScanner==null){
+            Toast.makeText(this, "Can not find BLE Scanner", Toast.LENGTH_SHORT).show();
             finish();
             return;
         }
@@ -131,7 +142,7 @@ public class DeviceScanActivity extends ListActivity{
         intent.putExtra(DeviceControlActivity.EXTRAS_DEVICE_NAME, device.getName());
         intent.putExtra(DeviceControlActivity.EXTRAS_DEVICE_ADDRESS, device.getAddress());
         if (mScanning) {
-             mBluetoothAdapter.stopLeScan(mLeScanCallback);
+             mBLEScanner.stopScan(mScanCallback);
              mScanning = false;
         }
         startActivity(intent);
@@ -143,7 +154,7 @@ public class DeviceScanActivity extends ListActivity{
                 @Override
                 public void run() {
                     mScanning = false;
-                    mBluetoothAdapter.stopLeScan(mLeScanCallback);
+                    mBLEScanner.stopScan(mScanCallback);
                     //mBluetoothAdapter.startLeScan(mLeScanCallback);
                     invalidateOptionsMenu();
                 }
@@ -151,11 +162,12 @@ public class DeviceScanActivity extends ListActivity{
 
             mScanning = true;
             //mScanning = false;
-            mBluetoothAdapter.startLeScan(mLeScanCallback);
+            mBLEScanner.stopScan(mScanCallback);
         } else {
             mScanning = false;
 
-            mBluetoothAdapter.stopLeScan(mLeScanCallback);
+            mBLEScanner.stopScan(mScanCallback);
+
         }
         invalidateOptionsMenu();
     }
@@ -225,7 +237,32 @@ public class DeviceScanActivity extends ListActivity{
             return view;
         }
     }
+    private ScanCallback mScanCallback = new ScanCallback() {
+        @Override
+        public void onScanResult(int callbackType, ScanResult result) {
+            processResult(result);
+        }
 
+        @Override
+        public void onBatchScanResults(List<ScanResult> results) {
+            for (ScanResult result : results) {
+                processResult(result);
+            }
+        }
+
+        @Override        public void onScanFailed(int errorCode) {
+        }
+
+        private void processResult(final ScanResult result) {
+            runOnUiThread(new Runnable() {
+                @Override                public void run() {
+                    mLeDeviceListAdapter.addDevice(result.getDevice());
+                    mLeDeviceListAdapter.notifyDataSetChanged();
+                }
+            });
+        }
+    };
+    /*
     // Device scan callback.
     private BluetoothAdapter.LeScanCallback mLeScanCallback =
             new BluetoothAdapter.LeScanCallback() {
@@ -241,7 +278,7 @@ public class DeviceScanActivity extends ListActivity{
                     });
                 }
             };
-
+    */ //삭제
     static class ViewHolder {
         TextView deviceName;
         TextView deviceAddress;
