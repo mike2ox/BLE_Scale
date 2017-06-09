@@ -158,8 +158,8 @@ public class BluetoothLeService extends Service{
                 format = BluetoothGattCharacteristic.FORMAT_UINT8;
                 //Log.e(TAG, "Heart rate format UINT8.!!!!!!!!");
             }
-
-            String mValue = "";     //이부분이 BLE앱 전용 코드
+/////////////////////////////////이부분이 BLE앱 전용 코드
+            String mValue = "";
             try {
                 StringBuilder sb = new StringBuilder();
                 String str = getHexString(characteristic.getValue()).toUpperCase();
@@ -313,7 +313,7 @@ public class BluetoothLeService extends Service{
             return result;
         } catch (Exception e) {	return null; }
     }
-
+//////////////////////////////여기까지 블루케어 자체 코드
     public class LocalBinder extends Binder {
         BluetoothLeService getService() {
             return BluetoothLeService.this;

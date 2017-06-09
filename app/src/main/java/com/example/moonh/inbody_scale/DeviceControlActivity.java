@@ -85,22 +85,21 @@ public class DeviceControlActivity extends Activity{
     };
 
     // Handles various events fired by the Service.
-    // ACTION_GATT_CONNECTED: connected to a GATT server.
-    // ACTION_GATT_DISCONNECTED: disconnected from a GATT server.
-    // ACTION_GATT_SERVICES_DISCOVERED: discovered GATT services.
-    // ACTION_DATA_AVAILABLE: received data from the device.  This can be a result of read
-    //                        or notification operations.
-    private final BroadcastReceiver mGattUpdateReceiver = new BroadcastReceiver() {
+    // ACTION_GATT_CONNECTED: GATT 서버에 연결
+    // ACTION_GATT_DISCONNECTED: GATT 서버와 연결x
+    // ACTION_GATT_SERVICES_DISCOVERED: GATT 서비스 발견..
+    // ACTION_DATA_AVAILABLE: 장치로부터 수신 된 데이터. 읽기 또는 알림 작업의 결과 일 수 있음
+     private final BroadcastReceiver mGattUpdateReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
             final String action = intent.getAction();
             if (BluetoothLeService.ACTION_GATT_CONNECTED.equals(action)) {
                 mConnected = true;
-                updateConnectionState(R.string.connected);
+                updateConnectionState(R.string.connected);  //리시버를 받느냐 연결되었느냐
                 invalidateOptionsMenu();
             } else if (BluetoothLeService.ACTION_GATT_DISCONNECTED.equals(action)) {
                 mConnected = false;
-                updateConnectionState(R.string.disconnected);
+                updateConnectionState(R.string.disconnected);   //리시버를 받느냐 연결이 끝겼느냐
                 invalidateOptionsMenu();
                 clearUI();
             } else if (BluetoothLeService.ACTION_GATT_SERVICES_DISCOVERED.equals(action)) {
@@ -210,7 +209,7 @@ public class DeviceControlActivity extends Activity{
         final Intent intent = getIntent();
         mDeviceName = intent.getStringExtra(EXTRAS_DEVICE_NAME);
         mDeviceAddress = intent.getStringExtra(EXTRAS_DEVICE_ADDRESS);
-//        mBluetoothLeService.disconnect();
+        //mBluetoothLeService.disconnect();
         // mDeviceAddress = intent.getStringExtra(EXTRAS_DEVICE_ADDRESS);
         //mBluetoothLeService.connect(mDeviceAddress);
 
@@ -257,13 +256,13 @@ public class DeviceControlActivity extends Activity{
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.gatt_services, menu);
         if (mConnected) {
-            Toast.makeText(getApplicationContext(), "aabb", Toast.LENGTH_LONG).show();      //0 -> Toast.legnth_long으로
+            Toast.makeText(getApplicationContext(), "연결", Toast.LENGTH_LONG).show();      //0 -> Toast.legnth_long으로
             menu.findItem(R.id.menu_connect).setVisible(false);
             menu.findItem(R.id.menu_disconnect).setVisible(true);
-            Toast.makeText(getApplicationContext(), "흠", Toast.LENGTH_LONG).show();
         } else {
             menu.findItem(R.id.menu_connect).setVisible(true);
             menu.findItem(R.id.menu_disconnect).setVisible(false);
+            Toast.makeText(getApplicationContext(), "안됨", Toast.LENGTH_LONG).show();
         }
         return true;
     }
@@ -274,7 +273,7 @@ public class DeviceControlActivity extends Activity{
         switch(item.getItemId()) {
             case R.id.menu_connect:
                 mBluetoothLeService.connect(mDeviceAddress);
-                Toast.makeText(getApplicationContext(), "흠2", Toast.LENGTH_LONG).show();
+                //Toast.makeText(getApplicationContext(), "흠", Toast.LENGTH_LONG).show();
                 return true;
             case R.id.menu_disconnect:
                 mBluetoothLeService.disconnect();
@@ -307,6 +306,7 @@ public class DeviceControlActivity extends Activity{
     // on the UI.
     private void displayGattServices(List<BluetoothGattService> gattServices) {
         if (gattServices == null) return;
+        Log.v(TAG, "gatt 서비스");
         String uuid = null;
         String unknownServiceString = getResources().getString(R.string.unknown_service);
         String unknownCharaString = getResources().getString(R.string.unknown_characteristic);
@@ -317,10 +317,11 @@ public class DeviceControlActivity extends Activity{
 
         // Loops through available GATT Services.
         for (BluetoothGattService gattService : gattServices) {
+            Log.v(TAG,"uuid를 얻어 hashmap으로 key와value(String, String)를 하나의 쌍으로 묶어 저장->리스트로!!_");
             HashMap<String, String> currentServiceData = new HashMap<String, String>();
             uuid = gattService.getUuid().toString();
             currentServiceData.put(
-                    LIST_NAME, SampleGattAttributes.lookup(uuid, unknownServiceString));
+                    LIST_NAME, SampleGattAttributes.lookup(uuid, unknownServiceString));            /////이부분에 샘플 가타를 가져오도록 하는데 이거 잘못된듯?
             currentServiceData.put(LIST_UUID, uuid);
             gattServiceData.add(currentServiceData);
 
@@ -367,7 +368,7 @@ public class DeviceControlActivity extends Activity{
         intentFilter.addAction(BluetoothLeService.ACTION_DATA_AVAILABLE);
         return intentFilter;
     }
-
+///////////////이부분도 블루케어 자체 코드
     private String getDecToHex(String dec){
 
         Long intDec = Long.parseLong(dec);

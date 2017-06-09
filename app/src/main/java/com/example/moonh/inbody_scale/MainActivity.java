@@ -75,8 +75,10 @@ public class MainActivity extends Activity {
                 } else  {
                     height = edit2.getText().toString();
                     age = edit3.getText().toString();
+
+                    //다음 액티비티로 넘어가는 장면
                     Intent i = new Intent(getApplicationContext(), DeviceScanActivity.class);
-                    startActivity(i);
+                    startActivity(i);   //리턴값이 필요없음
                     finish();
                 }
 
